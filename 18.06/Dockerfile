@@ -1,7 +1,8 @@
-FROM frolvlad/alpine-glibc:alpine-3.6
+FROM frolvlad/alpine-glibc:latest
 
 RUN apk update && apk add --no-cache \
 		ca-certificates wget tar git go openssl ca-certificates dev86 gcc linux-headers musl-dev
+# RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
@@ -25,7 +26,7 @@ RUN mkdir -p "$GOPATH/src/github.com/hyperhq/" \
 # - https://github.com/docker/docker-ce/blob/v17.09.0-ce/components/engine/hack/make.sh#L149
 # - https://github.com/golang/go/blob/go1.9.1/src/net/conf.go#L194-L275
 # - docker run --rm debian:stretch grep '^hosts:' /etc/nsswitch.conf
-RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
+
 
 ENV DOCKER_CHANNEL stable
 ENV DOCKER_VERSION 18.06.0-ce
