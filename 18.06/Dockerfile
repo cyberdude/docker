@@ -1,7 +1,25 @@
-FROM alpine:3.8
+FROM frolvlad/alpine-glibc:alpine-3.6
 
-RUN apk add --no-cache \
-		ca-certificates
+RUN apk update && apk add --no-cache \
+		ca-certificates wget tar git go openssl ca-certificates dev86 gcc linux-headers musl-dev
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+
+# install hyper
+RUN mkdir -p "$GOPATH/src/github.com/hyperhq/" \
+	&& cd $GOPATH/src/github.com/hyperhq/ \
+	&& git clone https://github.com/cyberdude/hypercli.git hypercli \
+	&& cd hypercli \
+	&& pwd \
+	&& ls \
+	&& sh build.sh
+
+# install hyper
+# RUN wget -q -O /tmp/hyper.tar.gz https://github.com/hyperhq/hypercli/releases/download/v1.10.12/hyper-linux-x86_64.tar.gz \
+#     && tar -xzf /tmp/hyper.tar.gz -C /usr/bin && chmod +x /usr/bin/hyper \
+#     && rm /tmp/hyper.tar.gz
 
 # set up nsswitch.conf for Go's "netgo" implementation (which Docker explicitly uses)
 # - https://github.com/docker/docker-ce/blob/v17.09.0-ce/components/engine/hack/make.sh#L149
@@ -11,6 +29,7 @@ RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
 ENV DOCKER_CHANNEL stable
 ENV DOCKER_VERSION 18.06.0-ce
+
 # TODO ENV DOCKER_SHA256
 # https://github.com/docker/docker-ce/blob/5b073ee2cf564edee5adca05eee574142f7627bb/components/packaging/static/hash_files !!
 # (no SHA file artifacts on download.docker.com yet as of 2017-06-07 though)
@@ -57,4 +76,4 @@ COPY modprobe.sh /usr/local/bin/modprobe
 COPY docker-entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["sh"]
+CMD [""]
